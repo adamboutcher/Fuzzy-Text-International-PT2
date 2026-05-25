@@ -80,11 +80,15 @@ static void makeAnimationsForLayer(Line *line, int delay)
 	// Destroy old animations
 	if (line->animation1 != NULL)
 	{
-		 property_animation_destroy(line->animation1);
+		animation_unschedule(property_animation_get_animation(line->animation1));
+		property_animation_destroy(line->animation1);
+		line->animation1 = NULL;
 	}
 	if (line->animation2 != NULL)
 	{
-		 property_animation_destroy(line->animation2);
+		animation_unschedule(property_animation_get_animation(line->animation2));
+		property_animation_destroy(line->animation2);
+		line->animation2 = NULL;
 	}
 
 	// Configure animation for current layer to move out
@@ -510,7 +514,18 @@ static void init_line(Line* line)
 
 static void destroy_line(Line* line)
 {
-	// Free layers
+	if (line->animation1 != NULL)
+	{
+		animation_unschedule(property_animation_get_animation(line->animation1));
+		property_animation_destroy(line->animation1);
+		line->animation1 = NULL;
+	}
+	if (line->animation2 != NULL)
+	{
+		animation_unschedule(property_animation_get_animation(line->animation2));
+		property_animation_destroy(line->animation2);
+		line->animation2 = NULL;
+	}
 	text_layer_destroy(line->currentLayer);
 	text_layer_destroy(line->nextLayer);
 }
