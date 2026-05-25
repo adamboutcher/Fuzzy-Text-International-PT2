@@ -71,6 +71,17 @@ static void animationStoppedHandler(struct Animation *animation, bool finished, 
 	layer_set_frame((Layer *)current, rect);
 }
 
+static void destroy_animation(PropertyAnimation **anim_ptr)
+{
+	if (*anim_ptr == NULL) return;
+	Animation *anim = property_animation_get_animation(*anim_ptr);
+	if (animation_is_scheduled(anim)) {
+		animation_unschedule(anim);
+	}
+	property_animation_destroy(*anim_ptr);
+	*anim_ptr = NULL;
+}
+
 // Animate line
 static void makeAnimationsForLayer(Line *line, int delay)
 {
@@ -78,18 +89,8 @@ static void makeAnimationsForLayer(Line *line, int delay)
 	TextLayer *next = line->nextLayer;
 
 	// Destroy old animations
-	if (line->animation1 != NULL)
-	{
-		animation_unschedule(property_animation_get_animation(line->animation1));
-		property_animation_destroy(line->animation1);
-		line->animation1 = NULL;
-	}
-	if (line->animation2 != NULL)
-	{
-		animation_unschedule(property_animation_get_animation(line->animation2));
-		property_animation_destroy(line->animation2);
-		line->animation2 = NULL;
-	}
+	destroy_animation(&line->animation1);
+	destroy_animation(&line->animation2);
 
 	// Configure animation for current layer to move out
 	GRect rect = layer_get_frame((Layer *)current);
@@ -514,18 +515,8 @@ static void init_line(Line* line)
 
 static void destroy_line(Line* line)
 {
-	if (line->animation1 != NULL)
-	{
-		animation_unschedule(property_animation_get_animation(line->animation1));
-		property_animation_destroy(line->animation1);
-		line->animation1 = NULL;
-	}
-	if (line->animation2 != NULL)
-	{
-		animation_unschedule(property_animation_get_animation(line->animation2));
-		property_animation_destroy(line->animation2);
-		line->animation2 = NULL;
-	}
+	destroy_animation(&line->animation1);
+	destroy_animation(&line->animation2);
 	text_layer_destroy(line->currentLayer);
 	text_layer_destroy(line->nextLayer);
 }
