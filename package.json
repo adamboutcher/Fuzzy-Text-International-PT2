@@ -1,5 +1,5 @@
 {
-    "author": "Adam Boutcher & Jesse Hallett",
+    "author": "Adam Boutcher",
     "dependencies": {},
     "keywords": [],
     "name": "fuzzy-text-int-l-2",
@@ -18,12 +18,14 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
-            "diorite"
+            "diorite",
+            "emery",
+            "flint"
         ],
         "uuid": "88b9a785-1c45-4a56-837f-8c202e4f15bd",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "2.0.0"
+    "version": "2.0.1"
 }
