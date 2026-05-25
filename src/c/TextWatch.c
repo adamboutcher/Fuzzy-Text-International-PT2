@@ -47,6 +47,7 @@ static int row_height;
 typedef struct {
 	TextLayer *currentLayer;
 	TextLayer *nextLayer;
+	TextLayer *outgoingLayer;
 	char lineStr1[BUFFER_SIZE];
 	char lineStr2[BUFFER_SIZE];
 	PropertyAnimation *animation1;
@@ -62,13 +63,24 @@ static int currentNLines;
 static bool showTime = true;
 static int dateTimeout = 0;
 
-// Animation handler
+// Resets the outgoing layer off-screen and nulls both animation pointers on natural completion.
 static void animationStoppedHandler(struct Animation *animation, bool finished, void *context)
 {
-	TextLayer *current = (TextLayer *)context;
-	GRect rect = layer_get_frame((Layer *)current);
+	Line *line = (Line *)context;
+	GRect rect = layer_get_frame((Layer *)line->outgoingLayer);
 	rect.origin.x = screen_width;
-	layer_set_frame((Layer *)current, rect);
+	layer_set_frame((Layer *)line->outgoingLayer, rect);
+	if (finished) {
+		line->animation2 = NULL;
+	}
+}
+
+static void animationOutStoppedHandler(struct Animation *animation, bool finished, void *context)
+{
+	Line *line = (Line *)context;
+	if (finished) {
+		line->animation1 = NULL;
+	}
 }
 
 static void destroy_animation(PropertyAnimation **anim_ptr)
@@ -88,9 +100,12 @@ static void makeAnimationsForLayer(Line *line, int delay)
 	TextLayer *current = line->currentLayer;
 	TextLayer *next = line->nextLayer;
 
-	// Destroy old animations
+	// Destroy old animations (no-op if already nulled by stopped handlers)
 	destroy_animation(&line->animation1);
 	destroy_animation(&line->animation2);
+
+	// Track which layer is sliding out so the stopped handler can reset it
+	line->outgoingLayer = current;
 
 	// Configure animation for current layer to move out
 	GRect rect = layer_get_frame((Layer *)current);
@@ -99,21 +114,22 @@ static void makeAnimationsForLayer(Line *line, int delay)
 	Animation *anim1 = property_animation_get_animation(line->animation1);
 	animation_set_duration(anim1, ANIMATION_DURATION);
 	animation_set_delay(anim1, delay);
-	animation_set_curve(anim1, AnimationCurveEaseIn); // Accelerate
+	animation_set_curve(anim1, AnimationCurveEaseIn);
+	animation_set_handlers(anim1, (AnimationHandlers) {
+		.stopped = (AnimationStoppedHandler)animationOutStoppedHandler
+	}, line);
 
-	// Configure animation for current layer to move in
+	// Configure animation for next layer to move in
 	GRect rect2 = layer_get_frame((Layer *)next);
 	rect2.origin.x = 0;
 	line->animation2 = property_animation_create_layer_frame((Layer *)next, NULL, &rect2);
 	Animation *anim2 = property_animation_get_animation(line->animation2);
 	animation_set_duration(anim2, ANIMATION_DURATION);
 	animation_set_delay(anim2, delay + ANIMATION_OUT_IN_DELAY);
-	animation_set_curve(anim2, AnimationCurveEaseOut); // Deaccelerate
-
-	// Set a handler to rearrange layers after animation is finished
+	animation_set_curve(anim2, AnimationCurveEaseOut);
 	animation_set_handlers(anim2, (AnimationHandlers) {
 		.stopped = (AnimationStoppedHandler)animationStoppedHandler
-	}, current);
+	}, line);
 
 	// Start the animations
 	animation_schedule(anim1);
@@ -511,6 +527,7 @@ static void init_line(Line* line)
 	// Initially there are no animations
 	line->animation1 = NULL;
 	line->animation2 = NULL;
+	line->outgoingLayer = NULL;
 }
 
 static void destroy_line(Line* line)
