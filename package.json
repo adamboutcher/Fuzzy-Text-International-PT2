@@ -14,16 +14,16 @@
         "resources": {
             "media": [
                 {
-                    "type": "font",
-                    "name": "FONT_LARGE_BOLD_50",
+                    "characterRegex": "[A-Za-z\\u00C0-\\u00FF ]",
                     "file": "fonts/large_bold.ttf",
-                    "characterRegex": "[A-Za-z\\u00C0-\\u00FF ]"
+                    "name": "FONT_LARGE_BOLD_50",
+                    "type": "font"
                 },
                 {
-                    "type": "font",
-                    "name": "FONT_LARGE_LIGHT_50",
+                    "characterRegex": "[A-Za-z\\u00C0-\\u00FF ]",
                     "file": "fonts/large_light.ttf",
-                    "characterRegex": "[A-Za-z\\u00C0-\\u00FF ]"
+                    "name": "FONT_LARGE_LIGHT_50",
+                    "type": "font"
                 }
             ]
         },
@@ -31,8 +31,10 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
+            "chalk",
             "diorite",
             "emery",
+            "gabbro",
             "flint"
         ],
         "uuid": "88b9a785-1c45-4a56-837f-8c202e4f15bd",
@@ -40,5 +42,5 @@
             "watchface": true
         }
     },
-    "version": "2.0.1"
+    "version": "2.1.3"
 }
