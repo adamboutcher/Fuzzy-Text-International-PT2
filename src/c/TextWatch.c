@@ -43,6 +43,10 @@ static int font_size = FONT_SIZE_LARGE;
 
 static Window *window;
 
+static int screen_width;
+static int screen_height;
+static int row_height;
+
 static GColor fg_color(void) { return invert ? GColorBlack : GColorWhite; }
 static GColor bg_color(void) { return invert ? GColorWhite : GColorBlack; }
 
@@ -69,10 +73,6 @@ static int compute_row_height(void) {
 		default:               return screen_height > 168 ? 45 : 37;
 	}
 }
-
-static int screen_width;
-static int screen_height;
-static int row_height;
 
 typedef struct {
 	TextLayer *currentLayer;
