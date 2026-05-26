@@ -32,7 +32,7 @@ var configHTML = [
   '<meta charset="utf-8">',
   '<title>Configure Fuzzy Text</title>',
   '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">',
-  '<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">',
+  '<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">',
   '</head><body><div class="container">',
   '<header><h1>Configure Fuzzy Text Int\'l</h1></header>',
   '<form id="config" role="form" class="input-lg">',
@@ -71,7 +71,7 @@ var configHTML = [
   '</fieldset>',
   '</form></div>',
 
-  '<script src="//code.jquery.com/jquery-1.11.0.min.js"><\/script>',
+  '<script src="https://code.jquery.com/jquery-1.11.0.min.js"><\/script>',
   '<script>',
   'function getParam(k){var val;window.location.hash.replace(/(?:^|[#&])([a-z_]+)=([^&]+)/ig,function(_,key,v){if(k===key)val=decodeURIComponent(v);});return val;}',
   'function saveOptions(){var p={};$("#config").serializeArray().forEach(function(x){p[x.name]=x.value;});',
