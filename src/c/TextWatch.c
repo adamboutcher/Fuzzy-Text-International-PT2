@@ -538,6 +538,11 @@ static void destroy_line(Line* line)
 	text_layer_destroy(line->nextLayer);
 }
 
+static void window_appear(Window *window)
+{
+	display_time(t);
+}
+
 static void window_load(Window *window)
 {
 	Layer *window_layer = window_get_root_layer(window);
@@ -605,7 +610,8 @@ static void handle_init() {
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
-		.unload = window_unload
+		.unload = window_unload,
+		.appear = window_appear
 	});
 
 	// Initialize message queue
