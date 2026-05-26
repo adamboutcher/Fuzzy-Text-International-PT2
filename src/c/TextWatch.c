@@ -12,6 +12,11 @@
 #define INVERT_KEY 0
 #define TEXT_ALIGN_KEY 1
 #define LANGUAGE_KEY 2
+#define FONT_SIZE_KEY 3
+
+#define FONT_SIZE_SMALL  0
+#define FONT_SIZE_MEDIUM 1
+#define FONT_SIZE_LARGE  2
 
 #define TEXT_ALIGN_CENTER 0
 #define TEXT_ALIGN_LEFT 1
@@ -34,11 +39,36 @@ static uint8_t sync_buffer[64];
 static int text_align = TEXT_ALIGN_CENTER;
 static bool invert = false;
 static Language lang = EN_US;
+static int font_size = FONT_SIZE_LARGE;
 
 static Window *window;
 
 static GColor fg_color(void) { return invert ? GColorBlack : GColorWhite; }
 static GColor bg_color(void) { return invert ? GColorWhite : GColorBlack; }
+
+static const char* bold_font(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_24_BOLD;
+		case FONT_SIZE_MEDIUM: return FONT_KEY_GOTHIC_28_BOLD;
+		default:               return FONT_KEY_BITHAM_42_BOLD;
+	}
+}
+
+static const char* light_font(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_24;
+		case FONT_SIZE_MEDIUM: return FONT_KEY_GOTHIC_28;
+		default:               return FONT_KEY_BITHAM_42_LIGHT;
+	}
+}
+
+static int compute_row_height(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return 28;
+		case FONT_SIZE_MEDIUM: return 34;
+		default:               return screen_height > 168 ? 45 : 37;
+	}
+}
 
 static int screen_width;
 static int screen_height;
@@ -190,7 +220,7 @@ static GTextAlignment lookup_text_alignment(int align_key)
 // Configure bold line of text
 static void configureBoldLayer(TextLayer *textlayer)
 {
-	text_layer_set_font(textlayer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+	text_layer_set_font(textlayer, fonts_get_system_font(bold_font()));
 	text_layer_set_text_color(textlayer, fg_color());
 	text_layer_set_background_color(textlayer, GColorClear);
 	text_layer_set_text_alignment(textlayer, lookup_text_alignment(text_align));
@@ -199,7 +229,7 @@ static void configureBoldLayer(TextLayer *textlayer)
 // Configure light line of text
 static void configureLightLayer(TextLayer *textlayer)
 {
-	text_layer_set_font(textlayer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+	text_layer_set_font(textlayer, fonts_get_system_font(light_font()));
 	text_layer_set_text_color(textlayer, fg_color());
 	text_layer_set_background_color(textlayer, GColorClear);
 	text_layer_set_text_alignment(textlayer, lookup_text_alignment(text_align));
@@ -506,6 +536,17 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 			{
 				display_time(t);
 			}
+			break;
+		case FONT_SIZE_KEY:
+			font_size = new_tuple->value->uint8;
+			persist_write_int(FONT_SIZE_KEY, font_size);
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set font size: %u", font_size);
+
+			row_height = compute_row_height();
+			if (t)
+			{
+				display_time(t);
+			}
 	}
 }
 
@@ -566,7 +607,7 @@ static void window_load(Window *window)
 	GRect bounds = layer_get_frame(window_layer);
 	screen_width = bounds.size.w;
 	screen_height = bounds.size.h;
-	row_height = (screen_height > 168) ? 45 : 37;
+	row_height = compute_row_height();
 
 	// Init and load lines
 	for (int i = 0; i < NUM_LINES; i++)
@@ -588,7 +629,8 @@ static void window_load(Window *window)
 	Tuplet initial_values[] = {
 		TupletInteger(TEXT_ALIGN_KEY, (uint8_t) text_align),
 		TupletInteger(INVERT_KEY,     (uint8_t) invert ? 1 : 0),
-		TupletInteger(LANGUAGE_KEY,   (uint8_t) lang)
+		TupletInteger(LANGUAGE_KEY,   (uint8_t) lang),
+		TupletInteger(FONT_SIZE_KEY,  (uint8_t) font_size)
 	};
 
 	app_sync_init(&sync, sync_buffer, sizeof(sync_buffer), initial_values, ARRAY_LENGTH(initial_values),
@@ -622,6 +664,11 @@ static void handle_init() {
 	{
 		lang = (Language) persist_read_int(LANGUAGE_KEY);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read language from store: %u", lang);
+	}
+	if (persist_exists(FONT_SIZE_KEY))
+	{
+		font_size = persist_read_int(FONT_SIZE_KEY);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read font size from store: %u", font_size);
 	}
 
 	window = window_create();
