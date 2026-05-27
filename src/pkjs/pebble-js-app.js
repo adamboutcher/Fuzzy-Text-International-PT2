@@ -42,6 +42,11 @@ var configHTML = [
   '<input type="checkbox" name="invert" value="on"> invert colors',
   '</label></div></fieldset>',
 
+  '<fieldset><legend>Shake to show date:</legend>',
+  '<div class="checkbox"><label>',
+  '<input type="checkbox" name="show_date" value="on" checked> enable shake to show date',
+  '</label></div></fieldset>',
+
   '<fieldset><legend>Text align:</legend>',
   '<div class="radio-inline"><label><input type="radio" name="align" value="left"> left</label></div>',
   '<div class="radio-inline"><label><input type="radio" name="align" value="center" checked> center</label></div>',
@@ -75,9 +80,10 @@ var configHTML = [
   '<script>',
   'function getParam(k){var val;window.location.hash.replace(/(?:^|[#&])([a-z_]+)=([^&]+)/ig,function(_,key,v){if(k===key)val=decodeURIComponent(v);});return val;}',
   'function saveOptions(){var p={};$("#config").serializeArray().forEach(function(x){p[x.name]=x.value;});',
-  'return{invert:p.invert==="on",text_align:p.align||"center",font_size:p.font_size||"large",lang:p.lang};}',
+  'return{invert:p.invert==="on",show_date:p.show_date==="on",text_align:p.align||"center",font_size:p.font_size||"large",lang:p.lang};}',
   'function applyOptions(){var o=JSON.parse(getParam("options")||"{}");',
   'if(o.invert)$("[name=invert]").prop("checked",true);',
+  'if(o.show_date===false)$("[name=show_date]").prop("checked",false);',
   'if(o.text_align)$("[name=align]").filter(function(i,b){return b.value===o.text_align;}).prop("checked",true);',
   'if(o.font_size)$("[name=font_size]").filter(function(i,b){return b.value===o.font_size;}).prop("checked",true);',
   'if(o.lang)$("[name=lang]").filter(function(i,b){return b.value===o.lang;}).prop("checked",true);}',
@@ -112,6 +118,7 @@ function webviewclosed(event) {
 
   var options = JSON.parse(resp);
   if (typeof options.invert     === 'undefined' &&
+      typeof options.show_date  === 'undefined' &&
       typeof options.text_align === 'undefined' &&
       typeof options.font_size  === 'undefined' &&
       typeof options.lang       === 'undefined') {
@@ -138,7 +145,8 @@ function prepareConfiguration(serialized_settings) {
     '0': settings.invert ? 1 : 0,
     '1': alignments[settings.text_align] || 0,
     '2': langs[settings.lang] !== undefined ? langs[settings.lang] : langs.en_US,
-    '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.large
+    '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.large,
+    '4': settings.show_date === false ? 0 : 1
   };
 }
 
