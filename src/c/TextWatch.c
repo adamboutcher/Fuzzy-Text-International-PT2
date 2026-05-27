@@ -60,7 +60,7 @@ static GColor bg_color(void) { return invert ? GColorWhite : GColorBlack; }
 // Returns NULL for FONT_SIZE_LARGE, which uses a custom font resource.
 static const char* bold_font(void) {
 	switch (font_size) {
-		case FONT_SIZE_SMALL:
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_28_BOLD;
 		case FONT_SIZE_MEDIUM: return FONT_KEY_BITHAM_42_BOLD;
 		default:               return NULL;
 	}
@@ -68,7 +68,7 @@ static const char* bold_font(void) {
 
 static const char* light_font(void) {
 	switch (font_size) {
-		case FONT_SIZE_SMALL:
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_28;
 		case FONT_SIZE_MEDIUM: return FONT_KEY_BITHAM_42_LIGHT;
 		default:               return NULL;
 	}
@@ -76,7 +76,7 @@ static const char* light_font(void) {
 
 static int compute_row_height(void) {
 	switch (font_size) {
-		case FONT_SIZE_SMALL:  return 37;
+		case FONT_SIZE_SMALL:  return 34;
 		case FONT_SIZE_MEDIUM: return screen_height > 168 ? 45 : 37;
 		default:               return screen_height > 168 ? 50 : 48;
 	}
