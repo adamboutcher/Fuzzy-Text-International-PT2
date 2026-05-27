@@ -551,9 +551,17 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set font size: %u", font_size);
 
 			row_height = compute_row_height();
-			if (t)
-			{
-				display_time(t);
+			for (int i = 0; i < NUM_LINES; i++) {
+				destroy_animation(&lines[i].animation1);
+				destroy_animation(&lines[i].animation2);
+			}
+			if (t) {
+				display_initial_time(t);
+			}
+			for (int i = 0; i < NUM_LINES; i++) {
+				GRect rect = layer_get_frame((Layer *)lines[i].nextLayer);
+				rect.origin.x = screen_width;
+				layer_set_frame((Layer *)lines[i].nextLayer, rect);
 			}
 	}
 }
