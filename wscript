@@ -54,16 +54,16 @@ def build(ctx):
         flags=re.DOTALL
     )
 
-    # --- Generate config-html.js from the patched HTML ---
-    with open(os.path.join(pkjs_dir, 'config-html.js'), 'w') as f:
+    config_html_node = ctx.path.make_node('src/pkjs/config-html.js')
+    with open(config_html_node.abspath(), 'w') as f:
         f.write('var configHTML = ' + json.dumps(html) + ';\n')
 
-    # --- Generate langs-gen.js from the parsed enum ---
+    langs_node = ctx.path.make_node('src/pkjs/langs-gen.js')
     js_entries = ',\n'.join(
         '  {:6s} {}'.format(code + ':', value)
         for code, _, value in languages
     )
-    with open(os.path.join(pkjs_dir, 'langs-gen.js'), 'w') as f:
+    with open(langs_node.abspath(), 'w') as f:
         f.write('var langs = {{\n{}\n}};\n'.format(js_entries))
 
     jshint(['--config', 'pebble-jshintrc', 'src/pkjs/pebble-js-app.js'])
@@ -72,6 +72,6 @@ def build(ctx):
                     target='pebble-app.elf')
 
     ctx.pbl_bundle(elf='pebble-app.elf',
-                   js=[ctx.path.find_resource('src/pkjs/config-html.js'),
-                       ctx.path.find_resource('src/pkjs/langs-gen.js'),
+                   js=[config_html_node,
+                       langs_node,
                        ctx.path.find_resource('src/pkjs/pebble-js-app.js')])
