@@ -5,3 +5,4 @@
 # Ignore build generated files
 build
 wscript
+src/pkjs/config-html.js
