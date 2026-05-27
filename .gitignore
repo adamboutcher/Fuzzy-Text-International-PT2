@@ -6,3 +6,4 @@
 build
 wscript
 src/pkjs/config-html.js
+src/pkjs/langs-gen.js
