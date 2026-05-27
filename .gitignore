@@ -5,5 +5,5 @@
 # Ignore build generated files
 build
 wscript
-src/pkjs/config-html.js
-src/pkjs/langs-gen.js
+# config-html.js and langs-gen.js are committed so cloud builds work without running wscript.
+# Run `pebble build` locally to regenerate them after changing config.html or num2words.h.
