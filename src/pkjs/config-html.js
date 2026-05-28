@@ -3,13 +3,13 @@ var configHTML = [
   '<html lang="en">',
   '<head>',
   '  <meta charset="utf-8">',
-  '  <title>Configure Fuzzy Text</title>',
+  '  <title>Settings</title>',
   '  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">',
   '  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">',
   '</head>',
   '<body>',
   '<div class="container">',
-  '  <header><h1>Configure Fuzzy Text Int\'l</h1></header>',
+  '  <header><h1>Settings</h1></header>',
   '  <form id="config" role="form" class="input-lg">',
 
   '    <fieldset><legend>&#9680; Invert colors</legend>',
@@ -18,7 +18,7 @@ var configHTML = [
   '      </label></div>',
   '    </fieldset>',
 
-  '    <fieldset><legend>&#8645; Shake to show date</legend>',
+  '    <fieldset><legend>&#8645; Show date on shake</legend>',
   '      <div class="checkbox"><label>',
   '        <input type="checkbox" name="show_date" value="yes" checked> Enable',
   '      </label></div>',
@@ -58,7 +58,7 @@ var configHTML = [
   '    </fieldset>',
 
   '    <fieldset>',
-  '      <a href="pebblejs://close" class="btn btn-lg btn-default">Cancel</a>',
+  '      <br/><a href="pebblejs://close" class="btn btn-lg btn-default">Cancel</a>',
   '      <button type="button" class="btn btn-lg btn-primary" id="b-submit">Save</button>',
   '    </fieldset>',
   '  </form>',
