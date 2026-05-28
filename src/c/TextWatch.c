@@ -13,7 +13,12 @@
 #define TEXT_ALIGN_KEY 1
 #define LANGUAGE_KEY 2
 #define FONT_SIZE_KEY 3
-#define SHOW_DATE_KEY 4
+#define TRIGGER_KEY    4
+
+#define TRIGGER_OFF    0
+#define TRIGGER_SHAKE  1
+#define TRIGGER_BUTTON 2
+#define TRIGGER_BOTH   3
 
 #define FONT_SIZE_SMALL  0
 #define FONT_SIZE_MEDIUM 1
@@ -43,7 +48,7 @@ static int text_align = TEXT_ALIGN_CENTER;
 static bool invert = false;
 static Language lang = EN_US;
 static int font_size = FONT_SIZE_LARGE;
-static bool show_date = true;
+static int date_trigger = TRIGGER_SHAKE;
 
 static GFont custom_bold_font;
 static GFont custom_light_font;
@@ -399,11 +404,42 @@ static void display_time(struct tm *t)
   currentNLines = nextNLines;
 }
 
-static void tap_handler(AccelAxisType axis, int32_t direction)
+static void toggle_date(void)
 {
-  if (!show_date) return;
   showTime = !showTime;
   display_time(t);
+}
+
+static void tap_handler(AccelAxisType axis, int32_t direction)
+{
+  toggle_date();
+}
+
+static void back_button_handler(ClickRecognizerRef recognizer, void *context)
+{
+  toggle_date();
+}
+
+static void date_click_config_provider(void *context)
+{
+  window_single_click_subscribe(BUTTON_ID_BACK, back_button_handler);
+}
+
+static void apply_date_trigger(void)
+{
+  if (date_trigger == TRIGGER_SHAKE || date_trigger == TRIGGER_BOTH) {
+    accel_tap_service_subscribe(tap_handler);
+  } else {
+    accel_tap_service_unsubscribe();
+  }
+
+#if !DEBUG
+  if (date_trigger == TRIGGER_BUTTON || date_trigger == TRIGGER_BOTH) {
+    window_set_click_config_provider(window, date_click_config_provider);
+  } else {
+    window_set_click_config_provider(window, NULL);
+  }
+#endif
 }
 
 static void initLineForStart(Line* line)
@@ -567,14 +603,16 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 				layer_set_frame((Layer *)lines[i].nextLayer, rect);
 			}
 			break;
-		case SHOW_DATE_KEY:
-			show_date = new_tuple->value->uint8 == 1;
-			persist_write_bool(SHOW_DATE_KEY, show_date);
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set show date: %u", show_date ? 1 : 0);
-			if (!show_date && !showTime) {
+		case TRIGGER_KEY:
+			date_trigger = new_tuple->value->uint8;
+			persist_write_int(TRIGGER_KEY, date_trigger);
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set date trigger: %u", date_trigger);
+			if (date_trigger == TRIGGER_OFF && !showTime) {
 				showTime = true;
 				display_time(t);
 			}
+			apply_date_trigger();
+			break;
 	}
 }
 
@@ -662,7 +700,7 @@ static void window_load(Window *window)
 		TupletInteger(INVERT_KEY,     (uint8_t) invert ? 1 : 0),
 		TupletInteger(LANGUAGE_KEY,   (uint8_t) lang),
 		TupletInteger(FONT_SIZE_KEY,  (uint8_t) font_size),
-		TupletInteger(SHOW_DATE_KEY,  (uint8_t) show_date ? 1 : 0)
+		TupletInteger(TRIGGER_KEY,    (uint8_t) date_trigger)
 	};
 
 	app_sync_init(&sync, sync_buffer, sizeof(sync_buffer), initial_values, ARRAY_LENGTH(initial_values),
@@ -705,10 +743,10 @@ static void handle_init() {
 		font_size = persist_read_int(FONT_SIZE_KEY);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read font size from store: %u", font_size);
 	}
-	if (persist_exists(SHOW_DATE_KEY))
+	if (persist_exists(TRIGGER_KEY))
 	{
-		show_date = persist_read_bool(SHOW_DATE_KEY);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read show date from store: %u", show_date ? 1 : 0);
+		date_trigger = persist_read_int(TRIGGER_KEY);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read date trigger from store: %u", date_trigger);
 	}
 
 	window = window_create();
@@ -726,9 +764,8 @@ static void handle_init() {
 	const bool animated = true;
 	window_stack_push(window, animated);
   
-  // Sample as little as often to save battery and no need for precision
   accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
-  accel_tap_service_subscribe(tap_handler);
+  apply_date_trigger();
 
 	// Subscribe to minute ticks
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
