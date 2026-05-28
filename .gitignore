@@ -5,4 +5,4 @@
 # Ignore build generated files
 build
 wscript
-# config-html.js is committed alongside config.html — update both together when changing the settings UI.
+node_modules
