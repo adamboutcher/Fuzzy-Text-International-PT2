@@ -176,7 +176,7 @@ static void makeAnimationsForLayer(Line *line, int delay)
 
 	// Configure animation for next layer to move in
 	GRect rect2 = layer_get_frame((Layer *)next);
-	rect2.origin.x = SIDE_MARGIN;
+	rect2.origin.x = 0;
 	line->animation2 = property_animation_create_layer_frame((Layer *)next, NULL, &rect2);
 	Animation *anim2 = property_animation_get_animation(line->animation2);
 	animation_set_duration(anim2, ANIMATION_DURATION);
@@ -290,7 +290,7 @@ static int configureLayersForText(char text[NUM_LINES][BUFFER_SIZE], char format
 	// Set y positions for the lines
 	for (int i = 0; i < numLines; i++)
 	{
-		layer_set_frame((Layer *)lines[i].nextLayer, GRect(screen_width, ypos, screen_width - 2*SIDE_MARGIN, LAYER_HEIGHT));
+		layer_set_frame((Layer *)lines[i].nextLayer, GRect(screen_width, ypos, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
 		ypos += row_height;
 	}
 
@@ -454,7 +454,7 @@ static void initLineForStart(Line* line)
 
 	// Move current layer to screen;
 	GRect rect = layer_get_frame((Layer *)line->currentLayer);
-	rect.origin.x = SIDE_MARGIN;
+	rect.origin.x = 0;
 	layer_set_frame((Layer *)line->currentLayer, rect);
 }
 
@@ -629,8 +629,8 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 static void init_line(Line* line)
 {
 	// Create layers with dummy position to the right of the screen
-	line->currentLayer = text_layer_create(GRect(screen_width, 0, screen_width - 2*SIDE_MARGIN, LAYER_HEIGHT));
-	line->nextLayer = text_layer_create(GRect(screen_width, 0, screen_width - 2*SIDE_MARGIN, LAYER_HEIGHT));
+	line->currentLayer = text_layer_create(GRect(screen_width, 0, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
+	line->nextLayer = text_layer_create(GRect(screen_width, 0, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
 
 	// Configure a style
 	configureLightLayer(line->currentLayer);
