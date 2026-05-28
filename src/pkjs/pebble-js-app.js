@@ -27,12 +27,6 @@ var fontSizes = {
   large:  2
 };
 
-var dateTriggers = {
-  disabled: 0,
-  shake:    1,
-  button:   2,
-  both:     3
-};
 
 // configHTML is defined in config-html.js — edit config.html then update that file to match.
 
@@ -61,7 +55,7 @@ function webviewclosed(event) {
 
   var options = JSON.parse(resp);
   if (typeof options.invert     === 'undefined' &&
-      typeof options.date_trigger === 'undefined' &&
+      typeof options.show_date  === 'undefined' &&
       typeof options.text_align === 'undefined' &&
       typeof options.font_size  === 'undefined' &&
       typeof options.lang       === 'undefined') {
@@ -85,11 +79,11 @@ function setOptions(options) {
 function prepareConfiguration(serialized_settings) {
   var settings = JSON.parse(serialized_settings);
   return {
-    '0': settings.invert ? 1 : 0,
+    '0': (settings.invert === true || settings.invert === 'yes') ? 1 : 0,
     '1': alignments[settings.text_align] || 0,
     '2': langs[settings.lang] !== undefined ? langs[settings.lang] : langs.en_US,
     '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.large,
-    '4': dateTriggers[settings.date_trigger] !== undefined ? dateTriggers[settings.date_trigger] : dateTriggers.shake
+    '4': (settings.show_date === false || settings.show_date === 'no') ? 0 : 1
   };
 }
 
