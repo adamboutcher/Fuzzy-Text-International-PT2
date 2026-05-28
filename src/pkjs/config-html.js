@@ -92,8 +92,10 @@ var configHTML = [
   '}',
 
   'function setRadio(name, value) {',
-  '  var el = document.querySelector("[name=" + name + "][value=" + value + "]");',
-  '  if (el) el.checked = true;',
+  '  var radios = document.querySelectorAll("[name=" + name + "]");',
+  '  for (var i = 0; i < radios.length; i++) {',
+  '    radios[i].checked = (radios[i].value === value);',
+  '  }',
   '}',
 
   'function applyOptions() {',
