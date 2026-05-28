@@ -28,7 +28,7 @@ var fontSizes = {
 };
 
 
-// configHTML is defined in config-html.js — edit config.html then update that file to match.
+// configHTML is defined in config-html.js — edit that file to change the settings UI.
 
 function readyCallback(event) {
   isReady = true;

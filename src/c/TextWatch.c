@@ -106,6 +106,7 @@ static struct tm *t = &t_buf;
 static int currentNLines;
 
 static bool showTime = true;
+// Minutes elapsed while showing date; auto-reverts to time after 2 ticks.
 static int dateTimeout = 0;
 
 // Resets the outgoing layer off-screen and nulls both animation pointers on natural completion.
@@ -185,9 +186,7 @@ static void updateLayerText(TextLayer* layer, char* text)
 {
 	const char* layerText = text_layer_get_text(layer);
 	strcpy((char*)layerText, text);
-	// To mark layer dirty
 	text_layer_set_text(layer, layerText);
-    //layer_mark_dirty(&layer->layer);
 }
 
 // Update line
@@ -380,35 +379,34 @@ static void date_to_lines(int day, int date, int month, char lines[NUM_LINES][BU
 // Update screen based on new time
 static void display_time(struct tm *t)
 {
-  // The current time text will be stored in the following strings
-  char textLine[NUM_LINES][BUFFER_SIZE];
-  char format[NUM_LINES];
-  
-  if (showTime || dateTimeout > 1) {
-  	time_to_lines(t->tm_hour, t->tm_min, t->tm_sec, textLine, format);
-    dateTimeout = 0;
-    showTime = true;
-  } else {
-    date_to_lines(t->tm_wday, t->tm_mday, t->tm_mon, textLine, format);
-  }
-  
-  int nextNLines = configureLayersForText(textLine, format);
+	char textLine[NUM_LINES][BUFFER_SIZE];
+	char format[NUM_LINES];
 
-  int delay = 0;
-  for (int i = 0; i < NUM_LINES; i++) {
-    if (nextNLines != currentNLines || needToUpdateLine(&lines[i], textLine[i])) {
-      updateLineTo(&lines[i], textLine[i], delay);
-      delay += ANIMATION_STAGGER_TIME;
-    }
-  }
+	if (showTime || dateTimeout > 1) {
+		time_to_lines(t->tm_hour, t->tm_min, t->tm_sec, textLine, format);
+		dateTimeout = 0;
+		showTime = true;
+	} else {
+		date_to_lines(t->tm_wday, t->tm_mday, t->tm_mon, textLine, format);
+	}
 
-  currentNLines = nextNLines;
+	int nextNLines = configureLayersForText(textLine, format);
+
+	int delay = 0;
+	for (int i = 0; i < NUM_LINES; i++) {
+		if (nextNLines != currentNLines || needToUpdateLine(&lines[i], textLine[i])) {
+			updateLineTo(&lines[i], textLine[i], delay);
+			delay += ANIMATION_STAGGER_TIME;
+		}
+	}
+
+	currentNLines = nextNLines;
 }
 
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
-  showTime = !showTime;
-  display_time(t);
+	showTime = !showTime;
+	display_time(t);
 }
 
 static void initLineForStart(Line* line)
