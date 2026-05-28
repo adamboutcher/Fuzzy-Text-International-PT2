@@ -267,7 +267,7 @@ static int configureLayersForText(char text[NUM_LINES][BUFFER_SIZE], char format
 	// Set bold layer.
 	int i;
 	for (i = 0; i < NUM_LINES; i++) {
-		if (strlen(text[i]) > 0) {
+		if (text[i][0] != '\0') {
 			if (format[i] == 'b')
 			{
 				configureBoldLayer(lines[i].nextLayer);
@@ -393,6 +393,14 @@ static void cancel_date_timer(void)
 	}
 }
 
+// Count leading non-empty lines (lines are always filled contiguously from 0).
+static int count_lines(char text[NUM_LINES][BUFFER_SIZE])
+{
+	int i;
+	for (i = 0; i < NUM_LINES && text[i][0] != '\0'; i++) {}
+	return i;
+}
+
 // Update screen based on new time
 static void display_time(struct tm *t)
 {
@@ -405,7 +413,22 @@ static void display_time(struct tm *t)
 		date_to_lines(t->tm_wday, t->tm_mday, t->tm_mon, textLine, format);
 	}
 
-	int nextNLines = configureLayersForText(textLine, format);
+	int nextNLines = count_lines(textLine);
+
+	// Bail out before touching any layers if nothing changed. This skips the
+	// expensive reconfigure + redraw on the ~4 of every 5 minute ticks where
+	// the fuzzy time text is identical to what's already on screen.
+	bool changed = (nextNLines != currentNLines);
+	for (int i = 0; !changed && i < NUM_LINES; i++) {
+		if (needToUpdateLine(&lines[i], textLine[i])) {
+			changed = true;
+		}
+	}
+	if (!changed) {
+		return;
+	}
+
+	configureLayersForText(textLine, format);
 
 	int delay = 0;
 	for (int i = 0; i < NUM_LINES; i++) {
