@@ -12,7 +12,20 @@
         "messageKeys": [],
         "projectType": "native",
         "resources": {
-            "media": []
+            "media": [
+                {
+                    "characterRegex": "[A-Za-z0-9\\u00C0-\\u00FF ]",
+                    "file": "fonts/large_bold.ttf",
+                    "name": "FONT_LARGE_BOLD_50",
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[A-Za-z0-9\\u00C0-\\u00FF ]",
+                    "file": "fonts/large_light.ttf",
+                    "name": "FONT_LARGE_LIGHT_50",
+                    "type": "font"
+                }
+            ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
@@ -21,13 +34,13 @@
             "chalk",
             "diorite",
             "emery",
-            "flint",
-            "gabbro"
+            "gabbro",
+            "flint"
         ],
         "uuid": "88b9a785-1c45-4a56-837f-8c202e4f15bd",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "2.0.8"
+    "version": "2.1.0"
 }

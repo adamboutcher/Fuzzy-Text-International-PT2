@@ -178,20 +178,48 @@ const char* get_month(Language lang, int index) {
   }
 }
 
+const char* get_date_format(Language lang) {
+  switch (lang) {
+    default:
+      return DATE_FORMAT_EN_US;
+  }
+}
+
+// Replace $1, $2, $3 in fmt with s1, s2, s3 respectively.
+static void format_date_string(char* buffer, size_t length,
+                                const char* fmt,
+                                const char* s1, const char* s2, const char* s3) {
+  memset(buffer, 0, length);
+  size_t pos = 0;
+  const char* src = fmt;
+
+  while (*src && pos < length - 1) {
+    if (*src == '$' && *(src + 1) >= '1' && *(src + 1) <= '3') {
+      const char* sub = NULL;
+      switch (*(src + 1)) {
+        case '1': sub = s1; break;
+        case '2': sub = s2; break;
+        case '3': sub = s3; break;
+      }
+      src += 2;
+      if (sub) {
+        while (*sub && pos < length - 1) {
+          buffer[pos++] = *sub++;
+        }
+      }
+    } else {
+      buffer[pos++] = *src++;
+    }
+  }
+}
+
 void date_to_words(Language lang, int day, int date, int month, char* words, size_t buffer_size) {
-  size_t remaining = buffer_size;
-  memset(words, 0, buffer_size);
-  
-  const char* stringday = get_day(lang, day);
-  const char* stringmonth = get_month(lang, month);
-  
-  char stringdate[15];
-  itoa10(date, stringdate);
-  
-  remaining -= append_string(words, remaining, stringday);
-  remaining -= append_string(words, remaining, "  ");
-  remaining -= append_string(words, remaining, stringmonth);
-  remaining -= append_string(words, remaining, " ");
-  remaining -= append_string(words, remaining, stringdate);
-  remaining -= append_string(words, remaining, " ");
+  char date_str[6];
+  itoa10(date, date_str);
+
+  format_date_string(words, buffer_size,
+                     get_date_format(lang),
+                     get_day(lang, day),
+                     get_month(lang, month),
+                     date_str);
 }

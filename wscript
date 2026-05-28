@@ -13,10 +13,11 @@ def configure(ctx):
 def build(ctx):
     ctx.load('pebble_sdk')
 
-    jshint(['--config', 'pebble-jshintrc', 'src/js/pebble-js-app.js'])
+    jshint(['--config', 'pebble-jshintrc', 'src/pkjs/pebble-js-app.js'])
 
     ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
                     target='pebble-app.elf')
 
     ctx.pbl_bundle(elf='pebble-app.elf',
-                   js=ctx.path.ant_glob('src/js/**/*.js'))
+                   js=[ctx.path.find_resource('src/pkjs/config-html.js'),
+                       ctx.path.find_resource('src/pkjs/pebble-js-app.js')])

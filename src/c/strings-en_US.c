@@ -72,7 +72,10 @@ const char* const DAYS_EN_US[] = {
   "mon",
   "tue",
   "wed",
-  "thur",
+  "thu",
   "fri",
   "sat"
 };
+
+// Date format: $1 = day name, $2 = month name, $3 = date number
+const char* const DATE_FORMAT_EN_US = "$1  $2 $3 ";

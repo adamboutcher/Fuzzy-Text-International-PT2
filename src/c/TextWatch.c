@@ -4,14 +4,34 @@
 
 #define DEBUG 0
 
+#if DEBUG
+#define DBG(fmt, ...) APP_LOG(APP_LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
+#else
+#define DBG(fmt, ...)
+#endif
+
 #define NUM_LINES 4
 #define LINE_LENGTH 7
 #define BUFFER_SIZE (LINE_LENGTH + 2)
 #define TOP_MARGIN 10
+#define SIDE_MARGIN 2
 
 #define INVERT_KEY 0
 #define TEXT_ALIGN_KEY 1
 #define LANGUAGE_KEY 2
+#define FONT_SIZE_KEY 3
+#define SHOW_DATE_KEY     4
+#define DATE_TIMEOUT_KEY  5
+
+// Indices into DATE_TIMEOUT_MS[]; 0 = never auto-revert.
+#define DATE_TIMEOUT_NEVER   4
+#define DATE_TIMEOUT_DEFAULT 3  // 1 minute
+
+static const uint32_t DATE_TIMEOUT_MS[] = { 3000, 5000, 8000, 60000, 0 };
+
+#define FONT_SIZE_SMALL  0
+#define FONT_SIZE_MEDIUM 1
+#define FONT_SIZE_LARGE  2
 
 #define TEXT_ALIGN_CENTER 0
 #define TEXT_ALIGN_LEFT 1
@@ -24,25 +44,60 @@
 // Delay from the start of the current layer going out until the next layer slides in
 #define ANIMATION_OUT_IN_DELAY 100
 
+#define LAYER_HEIGHT 70
+
 #define LINE_APPEND_MARGIN 0
 // We can add a new word to a line if there are at least this many characters free after
 #define LINE_APPEND_LIMIT (LINE_LENGTH - LINE_APPEND_MARGIN)
 
 static AppSync sync;
-static uint8_t sync_buffer[64];
+static uint8_t sync_buffer[128];
 
 static int text_align = TEXT_ALIGN_CENTER;
 static bool invert = false;
 static Language lang = EN_US;
+static int font_size = FONT_SIZE_LARGE;
+static bool show_date = true;
+static int date_timeout_idx = DATE_TIMEOUT_DEFAULT;
+
+static AppTimer *date_timer = NULL;
+
+static GFont custom_bold_font;
+static GFont custom_light_font;
 
 static Window *window;
-
-static GColor fg_color(void) { return invert ? GColorBlack : GColorWhite; }
-static GColor bg_color(void) { return invert ? GColorWhite : GColorBlack; }
 
 static int screen_width;
 static int screen_height;
 static int row_height;
+
+static GColor fg_color(void) { return invert ? GColorBlack : GColorWhite; }
+static GColor bg_color(void) { return invert ? GColorWhite : GColorBlack; }
+
+// Returns NULL for FONT_SIZE_LARGE, which uses a custom font resource.
+static const char* bold_font(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_28_BOLD;
+		case FONT_SIZE_MEDIUM: return FONT_KEY_BITHAM_42_BOLD;
+		default:               return NULL;
+	}
+}
+
+static const char* light_font(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return FONT_KEY_GOTHIC_28;
+		case FONT_SIZE_MEDIUM: return FONT_KEY_BITHAM_42_LIGHT;
+		default:               return NULL;
+	}
+}
+
+static int compute_row_height(void) {
+	switch (font_size) {
+		case FONT_SIZE_SMALL:  return 34;
+		case FONT_SIZE_MEDIUM: return screen_height > 168 ? 45 : 37;
+		default:               return screen_height > 168 ? 50 : 48;
+	}
+}
 
 typedef struct {
 	TextLayer *currentLayer;
@@ -62,7 +117,6 @@ static struct tm *t = &t_buf;
 static int currentNLines;
 
 static bool showTime = true;
-static int dateTimeout = 0;
 
 // Resets the outgoing layer off-screen and nulls both animation pointers on natural completion.
 static void animationStoppedHandler(struct Animation *animation, bool finished, void *context)
@@ -141,9 +195,7 @@ static void updateLayerText(TextLayer* layer, char* text)
 {
 	const char* layerText = text_layer_get_text(layer);
 	strcpy((char*)layerText, text);
-	// To mark layer dirty
 	text_layer_set_text(layer, layerText);
-    //layer_mark_dirty(&layer->layer);
 }
 
 // Update line
@@ -190,7 +242,8 @@ static GTextAlignment lookup_text_alignment(int align_key)
 // Configure bold line of text
 static void configureBoldLayer(TextLayer *textlayer)
 {
-	text_layer_set_font(textlayer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+	const char *key = bold_font();
+	text_layer_set_font(textlayer, key ? fonts_get_system_font(key) : custom_bold_font);
 	text_layer_set_text_color(textlayer, fg_color());
 	text_layer_set_background_color(textlayer, GColorClear);
 	text_layer_set_text_alignment(textlayer, lookup_text_alignment(text_align));
@@ -199,7 +252,8 @@ static void configureBoldLayer(TextLayer *textlayer)
 // Configure light line of text
 static void configureLightLayer(TextLayer *textlayer)
 {
-	text_layer_set_font(textlayer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+	const char *key = light_font();
+	text_layer_set_font(textlayer, key ? fonts_get_system_font(key) : custom_light_font);
 	text_layer_set_text_color(textlayer, fg_color());
 	text_layer_set_background_color(textlayer, GColorClear);
 	text_layer_set_text_alignment(textlayer, lookup_text_alignment(text_align));
@@ -236,7 +290,7 @@ static int configureLayersForText(char text[NUM_LINES][BUFFER_SIZE], char format
 	// Set y positions for the lines
 	for (int i = 0; i < numLines; i++)
 	{
-		layer_set_frame((Layer *)lines[i].nextLayer, GRect(screen_width, ypos, screen_width, 50));
+		layer_set_frame((Layer *)lines[i].nextLayer, GRect(screen_width, ypos, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
 		ypos += row_height;
 	}
 
@@ -331,38 +385,64 @@ static void date_to_lines(int day, int date, int month, char lines[NUM_LINES][BU
 	}
 }
 
+static void cancel_date_timer(void)
+{
+	if (date_timer) {
+		app_timer_cancel(date_timer);
+		date_timer = NULL;
+	}
+}
+
 // Update screen based on new time
 static void display_time(struct tm *t)
 {
-  // The current time text will be stored in the following strings
-  char textLine[NUM_LINES][BUFFER_SIZE];
-  char format[NUM_LINES];
-  
-  if (showTime || dateTimeout > 1) {
-  	time_to_lines(t->tm_hour, t->tm_min, t->tm_sec, textLine, format);
-    dateTimeout = 0;
-    showTime = true;
-  } else {
-    date_to_lines(t->tm_wday, t->tm_mday, t->tm_mon, textLine, format);
-  }
-  
-  int nextNLines = configureLayersForText(textLine, format);
+	char textLine[NUM_LINES][BUFFER_SIZE];
+	char format[NUM_LINES];
 
-  int delay = 0;
-  for (int i = 0; i < NUM_LINES; i++) {
-    if (nextNLines != currentNLines || needToUpdateLine(&lines[i], textLine[i])) {
-      updateLineTo(&lines[i], textLine[i], delay);
-      delay += ANIMATION_STAGGER_TIME;
-    }
-  }
+	if (showTime) {
+		time_to_lines(t->tm_hour, t->tm_min, t->tm_sec, textLine, format);
+	} else {
+		date_to_lines(t->tm_wday, t->tm_mday, t->tm_mon, textLine, format);
+	}
 
-  currentNLines = nextNLines;
+	int nextNLines = configureLayersForText(textLine, format);
+
+	int delay = 0;
+	for (int i = 0; i < NUM_LINES; i++) {
+		if (nextNLines != currentNLines || needToUpdateLine(&lines[i], textLine[i])) {
+			updateLineTo(&lines[i], textLine[i], delay);
+			delay += ANIMATION_STAGGER_TIME;
+		}
+	}
+
+	currentNLines = nextNLines;
+}
+
+static void date_timer_callback(void *context)
+{
+	date_timer = NULL;
+	showTime = true;
+	display_time(t);
+}
+
+static void start_date_timer(void)
+{
+	cancel_date_timer();
+	uint32_t ms = DATE_TIMEOUT_MS[date_timeout_idx];
+	if (ms > 0) {
+		date_timer = app_timer_register(ms, date_timer_callback, NULL);
+	}
 }
 
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
-  showTime = !showTime;
-  display_time(t);
+	showTime = !showTime;
+	if (!showTime) {
+		start_date_timer();
+	} else {
+		cancel_date_timer();
+	}
+	display_time(t);
 }
 
 static void initLineForStart(Line* line)
@@ -403,11 +483,6 @@ static void display_initial_time(struct tm *t)
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	t_buf = *tick_time;
-
-  if (!showTime) {
-    dateTimeout++;
-  }
-  
 	display_time(tick_time);
 }
 
@@ -464,7 +539,7 @@ static void click_config_provider(ClickConfig **config, Window *window) {
 
 static void sync_error_callback(DictionaryResult dict_error, AppMessageResult app_message_error, void *context)
 {
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Sync Error: %d", app_message_error);
+	DBG("App Message Sync Error: %d", app_message_error);
 }
 
 static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tuple, const Tuple* old_tuple, void* context) {
@@ -473,7 +548,7 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 		case TEXT_ALIGN_KEY:
 			text_align = new_tuple->value->uint8;
 			persist_write_int(TEXT_ALIGN_KEY, text_align);
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set text alignment: %u", text_align);
+			DBG("Set text alignment: %u", text_align);
 
 			alignment = lookup_text_alignment(text_align);
 			for (int i = 0; i < NUM_LINES; i++)
@@ -487,7 +562,7 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 		case INVERT_KEY:
 			invert = new_tuple->value->uint8 == 1;
 			persist_write_bool(INVERT_KEY, invert);
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set invert: %u", invert ? 1 : 0);
+			DBG("Set invert: %u", invert ? 1 : 0);
 
 			window_set_background_color(window, bg_color());
 			for (int j = 0; j < NUM_LINES; j++) {
@@ -500,20 +575,62 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
 		case LANGUAGE_KEY:
 			lang = (Language) new_tuple->value->uint8;
 			persist_write_int(LANGUAGE_KEY, lang);
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Set language: %u", lang);
+			DBG("Set language: %u", lang);
 
 			if (t)
 			{
 				display_time(t);
 			}
+			break;
+		case FONT_SIZE_KEY:
+			font_size = new_tuple->value->uint8;
+			persist_write_int(FONT_SIZE_KEY, font_size);
+			DBG("Set font size: %u", font_size);
+
+			row_height = compute_row_height();
+			for (int i = 0; i < NUM_LINES; i++) {
+				destroy_animation(&lines[i].animation1);
+				destroy_animation(&lines[i].animation2);
+			}
+			if (t) {
+				display_initial_time(t);
+			}
+			for (int i = 0; i < NUM_LINES; i++) {
+				GRect rect = layer_get_frame((Layer *)lines[i].nextLayer);
+				rect.origin.x = screen_width;
+				layer_set_frame((Layer *)lines[i].nextLayer, rect);
+			}
+			break;
+		case SHOW_DATE_KEY:
+			show_date = new_tuple->value->uint8 == 1;
+			persist_write_bool(SHOW_DATE_KEY, show_date);
+			DBG("Set show date: %u", show_date ? 1 : 0);
+			if (show_date) {
+				accel_tap_service_subscribe(tap_handler);
+			} else {
+				accel_tap_service_unsubscribe();
+				cancel_date_timer();
+				if (!showTime) {
+					showTime = true;
+					display_time(t);
+				}
+			}
+			break;
+		case DATE_TIMEOUT_KEY:
+			date_timeout_idx = new_tuple->value->uint8;
+			persist_write_int(DATE_TIMEOUT_KEY, date_timeout_idx);
+			DBG("Set date timeout: %u", date_timeout_idx);
+			// Cancel any running timer; new timeout applies from the next shake.
+			cancel_date_timer();
+			break;
 	}
 }
 
 static void init_line(Line* line)
 {
 	// Create layers with dummy position to the right of the screen
-	line->currentLayer = text_layer_create(GRect(screen_width, 0, screen_width, 50));
-	line->nextLayer = text_layer_create(GRect(screen_width, 0, screen_width, 50));
+	line->currentLayer = text_layer_create(GRect(screen_width, 0, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
+	line->nextLayer = text_layer_create(GRect(screen_width, 0, screen_width - SIDE_MARGIN, LAYER_HEIGHT));
 
 	// Configure a style
 	configureLightLayer(line->currentLayer);
@@ -541,6 +658,10 @@ static void destroy_line(Line* line)
 
 static void window_appear(Window *window)
 {
+	// Always return to time view on re-appear and cancel any pending date timer.
+	cancel_date_timer();
+	showTime = true;
+
 	// Cancel any animations in progress (from background ticks while in menu)
 	for (int i = 0; i < NUM_LINES; i++) {
 		destroy_animation(&lines[i].animation1);
@@ -562,11 +683,14 @@ static void window_appear(Window *window)
 
 static void window_load(Window *window)
 {
+	custom_bold_font  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LARGE_BOLD_50));
+	custom_light_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LARGE_LIGHT_50));
+
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_frame(window_layer);
 	screen_width = bounds.size.w;
 	screen_height = bounds.size.h;
-	row_height = (screen_height > 168) ? 45 : 37;
+	row_height = compute_row_height();
 
 	// Init and load lines
 	for (int i = 0; i < NUM_LINES; i++)
@@ -586,9 +710,12 @@ static void window_load(Window *window)
 	display_initial_time(t);
 
 	Tuplet initial_values[] = {
-		TupletInteger(TEXT_ALIGN_KEY, (uint8_t) text_align),
-		TupletInteger(INVERT_KEY,     (uint8_t) invert ? 1 : 0),
-		TupletInteger(LANGUAGE_KEY,   (uint8_t) lang)
+		TupletInteger(TEXT_ALIGN_KEY,    (uint8_t) text_align),
+		TupletInteger(INVERT_KEY,        (uint8_t) invert ? 1 : 0),
+		TupletInteger(LANGUAGE_KEY,      (uint8_t) lang),
+		TupletInteger(FONT_SIZE_KEY,     (uint8_t) font_size),
+		TupletInteger(SHOW_DATE_KEY,     (uint8_t) show_date ? 1 : 0),
+		TupletInteger(DATE_TIMEOUT_KEY,  (uint8_t) date_timeout_idx)
 	};
 
 	app_sync_init(&sync, sync_buffer, sizeof(sync_buffer), initial_values, ARRAY_LENGTH(initial_values),
@@ -598,12 +725,16 @@ static void window_load(Window *window)
 static void window_unload(Window *window)
 {
 	app_sync_deinit(&sync);
+	cancel_date_timer();
 
 	// Free layers
 	for (int i = 0; i < NUM_LINES; i++)
 	{
 		destroy_line(&lines[i]);
 	}
+
+	fonts_unload_custom_font(custom_bold_font);
+	fonts_unload_custom_font(custom_light_font);
 }
 
 static void handle_init() {
@@ -611,17 +742,32 @@ static void handle_init() {
 	if (persist_exists(TEXT_ALIGN_KEY))
 	{
 		text_align = persist_read_int(TEXT_ALIGN_KEY);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read text alignment from store: %u", text_align);
+		DBG("Read text alignment from store: %u", text_align);
 	}
 	if (persist_exists(INVERT_KEY))
 	{
 		invert = persist_read_bool(INVERT_KEY);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read invert from store: %u", invert ? 1 : 0);
+		DBG("Read invert from store: %u", invert ? 1 : 0);
 	}
 	if (persist_exists(LANGUAGE_KEY))
 	{
 		lang = (Language) persist_read_int(LANGUAGE_KEY);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Read language from store: %u", lang);
+		DBG("Read language from store: %u", lang);
+	}
+	if (persist_exists(FONT_SIZE_KEY))
+	{
+		font_size = persist_read_int(FONT_SIZE_KEY);
+		DBG("Read font size from store: %u", font_size);
+	}
+	if (persist_exists(SHOW_DATE_KEY))
+	{
+		show_date = persist_read_bool(SHOW_DATE_KEY);
+		DBG("Read show date from store: %u", show_date ? 1 : 0);
+	}
+	if (persist_exists(DATE_TIMEOUT_KEY))
+	{
+		date_timeout_idx = persist_read_int(DATE_TIMEOUT_KEY);
+		DBG("Read date timeout from store: %u", date_timeout_idx);
 	}
 
 	window = window_create();
@@ -639,9 +785,9 @@ static void handle_init() {
 	const bool animated = true;
 	window_stack_push(window, animated);
   
-  // Sample as little as often to save battery and no need for precision
-  accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
-  accel_tap_service_subscribe(tap_handler);
+	if (show_date) {
+		accel_tap_service_subscribe(tap_handler);
+	}
 
 	// Subscribe to minute ticks
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);

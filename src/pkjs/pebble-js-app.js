@@ -1,4 +1,4 @@
-var VERSION = "1.2.1";
+var VERSION = "1.3";
 
 var isReady = false;
 var callbacks = [];
@@ -9,6 +9,7 @@ var alignments = {
   right:  2
 };
 
+// langs values must match the Language enum in src/c/num2words.h
 var langs = {
   ca:    0,
   de:    1,
@@ -19,6 +20,23 @@ var langs = {
   no:    6,
   sv:    7
 };
+
+var fontSizes = {
+  small:  0,
+  medium: 1,
+  large:  2
+};
+
+var dateTimeouts = {
+  '3s':    0,
+  '5s':    1,
+  '8s':    2,
+  '1min':  3,
+  'never': 4
+};
+
+
+// configHTML is defined in config-html.js — edit that file to change the settings UI.
 
 function readyCallback(event) {
   isReady = true;
@@ -32,79 +50,75 @@ function readyCallback(event) {
 function showConfiguration(event) {
   onReady(function() {
     var opts = getOptions();
-    var url  = "http://static.sitr.us.s3-website-us-west-2.amazonaws.com/configure-fuzzy-text.html";
-    Pebble.openURL(url + "#v=" + encodeURIComponent(VERSION) + "&options=" + encodeURIComponent(opts));
+    var url = 'data:text/html,' + encodeURIComponent(configHTML) +
+              '#v=' + encodeURIComponent(VERSION) +
+              '&options=' + encodeURIComponent(opts);
+    Pebble.openURL(url);
   });
 }
 
 function webviewclosed(event) {
   var resp = event.response;
-  console.log('configuration response: '+ resp + ' ('+ typeof resp +')');
+  console.log('configuration response: ' + resp + ' (' + typeof resp + ')');
 
   var options = JSON.parse(resp);
-  if (typeof options.invert === 'undefined' &&
-      typeof options.text_align === 'undefined' &&
-      typeof options.lang === 'undefined') {
+  if (typeof options.invert        === 'undefined' &&
+      typeof options.show_date     === 'undefined' &&
+      typeof options.date_timeout  === 'undefined' &&
+      typeof options.text_align    === 'undefined' &&
+      typeof options.font_size     === 'undefined' &&
+      typeof options.lang          === 'undefined') {
     return;
   }
 
   onReady(function() {
     setOptions(resp);
-
-    var message = prepareConfiguration(resp);
-    transmitConfiguration(message);
+    transmitConfiguration(prepareConfiguration(resp));
   });
 }
 
-// Retrieves stored configuration from localStorage.
 function getOptions() {
-  return localStorage.getItem("options") || ("{}");
+  return localStorage.getItem('options') || '{}';
 }
 
-// Stores options in localStorage.
 function setOptions(options) {
-  localStorage.setItem("options", options);
+  localStorage.setItem('options', options);
 }
 
-// Takes a string containing serialized JSON as input.  This is the
-// format that is sent back from the configuration web UI.  Produces
-// a JSON message to send to the watch face.
 function prepareConfiguration(serialized_settings) {
   var settings = JSON.parse(serialized_settings);
   return {
-    "0": settings.invert ? 1 : 0,
-    "1": alignments[settings.text_align],
-    "2": langs[settings.lang]
+    '0': (settings.invert === true || settings.invert === 'yes') ? 1 : 0,
+    '1': alignments[settings.text_align] || 0,
+    '2': langs[settings.lang] !== undefined ? langs[settings.lang] : langs.en_US,
+    '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.large,
+    '4': (settings.show_date === false || settings.show_date === 'no') ? 0 : 1,
+    '5': dateTimeouts[settings.date_timeout] !== undefined ? dateTimeouts[settings.date_timeout] : dateTimeouts['1min']
   };
 }
 
-// Takes a JSON message as input.  Sends the message to the watch.
 function transmitConfiguration(settings) {
-  console.log('sending message: '+ JSON.stringify(settings));
-  Pebble.sendAppMessage(settings, function(event) {
-    // Message delivered successfully
-  }, logError);
+  console.log('sending message: ' + JSON.stringify(settings));
+  Pebble.sendAppMessage(settings, function() {}, logError);
 }
 
 function logError(event) {
-  console.log('Unable to deliver message with transactionId='+
-              event.data.transactionId +' ; Error is'+ event.error.message);
+  console.log('Unable to deliver message with transactionId=' +
+    event.data.transactionId + '; Error is ' + event.error.message);
 }
 
 function onReady(callback) {
   if (isReady) {
     callback();
-  }
-  else {
+  } else {
     callbacks.push(callback);
   }
 }
 
-Pebble.addEventListener("ready", readyCallback);
-Pebble.addEventListener("showConfiguration", showConfiguration);
-Pebble.addEventListener("webviewclosed", webviewclosed);
+Pebble.addEventListener('ready', readyCallback);
+Pebble.addEventListener('showConfiguration', showConfiguration);
+Pebble.addEventListener('webviewclosed', webviewclosed);
 
-onReady(function(event) {
-  var message = prepareConfiguration(getOptions());
-  transmitConfiguration(message);
+onReady(function() {
+  transmitConfiguration(prepareConfiguration(getOptions()));
 });
