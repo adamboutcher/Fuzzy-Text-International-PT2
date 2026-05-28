@@ -14,13 +14,13 @@
         "resources": {
             "media": [
                 {
-                    "characterRegex": "[A-Za-z0-9\\u00C0-\\u00FF ]",
+                    "characterRegex": "[A-Za-z0-9'\\u00C0-\\u00FF ]",
                     "file": "fonts/large_bold.ttf",
                     "name": "FONT_LARGE_BOLD_50",
                     "type": "font"
                 },
                 {
-                    "characterRegex": "[A-Za-z0-9\\u00C0-\\u00FF ]",
+                    "characterRegex": "[A-Za-z0-9'\\u00C0-\\u00FF ]",
                     "file": "fonts/large_light.ttf",
                     "name": "FONT_LARGE_LIGHT_50",
                     "type": "font"

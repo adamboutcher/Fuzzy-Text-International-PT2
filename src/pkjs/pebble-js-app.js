@@ -91,7 +91,7 @@ function prepareConfiguration(serialized_settings) {
     '0': (settings.invert === true || settings.invert === 'yes') ? 1 : 0,
     '1': alignments[settings.text_align] || 0,
     '2': langs[settings.lang] !== undefined ? langs[settings.lang] : langs.en_US,
-    '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.large,
+    '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.medium,
     '4': (settings.show_date === false || settings.show_date === 'no') ? 0 : 1,
     '5': dateTimeouts[settings.date_timeout] !== undefined ? dateTimeouts[settings.date_timeout] : dateTimeouts['1min']
   };

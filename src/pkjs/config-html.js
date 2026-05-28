@@ -39,8 +39,8 @@ var configHTML = [
   '    </fieldset>',
 
   '    <fieldset><legend>&#9698; Font size</legend>',
-  '      <div class="radio"><label><input type="radio" name="font_size" value="large" checked> L &mdash; Large</label></div>',
-  '      <div class="radio"><label><input type="radio" name="font_size" value="medium"> M &mdash; Medium</label></div>',
+  '      <div class="radio"><label><input type="radio" name="font_size" value="large"> L &mdash; Large</label></div>',
+  '      <div class="radio"><label><input type="radio" name="font_size" value="medium" checked> M &mdash; Medium</label></div>',
   '      <div class="radio"><label><input type="radio" name="font_size" value="small"> S &mdash; Small</label></div>',
   '    </fieldset>',
 

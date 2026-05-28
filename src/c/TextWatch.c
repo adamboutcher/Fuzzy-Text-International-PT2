@@ -56,7 +56,7 @@ static uint8_t sync_buffer[128];
 static int text_align = TEXT_ALIGN_CENTER;
 static bool invert = false;
 static Language lang = EN_US;
-static int font_size = FONT_SIZE_LARGE;
+static int font_size = FONT_SIZE_MEDIUM;
 static bool show_date = true;
 static int date_timeout_idx = DATE_TIMEOUT_DEFAULT;
 
