@@ -54,6 +54,7 @@ var configHTML = [
   '        <option value="fr">Fran&#231;ais</option>',
   '        <option value="nl">Nederlands</option>',
   '        <option value="no">Norsk</option>',
+  '        <option value="pt">Portugu&#234;s</option>',
   '        <option value="sv">Svenska</option>',
   '      </select>',
   '    </fieldset>',

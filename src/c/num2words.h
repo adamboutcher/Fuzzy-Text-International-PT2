@@ -10,7 +10,8 @@ typedef enum {
   FR    = 0x5,  /* fr    | Français                */
   NO    = 0x6,  /* no    | Norsk                   */
   SV    = 0x7,  /* sv    | Svenska                 */
-  NL    = 0x8   /* nl    | Nederlands               */
+  NL    = 0x8,  /* nl    | Nederlands               */
+  PT    = 0x9   /* pt    | Português                */
 } Language;
 
 void time_to_words(Language lang, int hours, int minutes, int seconds, char* words, size_t length);
