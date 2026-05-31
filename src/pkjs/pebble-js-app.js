@@ -97,7 +97,7 @@ function prepareConfiguration(serialized_settings) {
     '3': fontSizes[settings.font_size] !== undefined ? fontSizes[settings.font_size] : fontSizes.medium,
     '4': (settings.show_date === false || settings.show_date === 'no') ? 0 : 1,
     '5': dateTimeouts[settings.date_timeout] !== undefined ? dateTimeouts[settings.date_timeout] : dateTimeouts['1min'],
-    '6': (settings.date_suffix === false || settings.date_suffix === 'no') ? 0 : 1
+    '6': (settings.date_suffix === true || settings.date_suffix === 'yes') ? 1 : 0
   };
 }
 
