@@ -77,5 +77,7 @@ const char* const DAYS_EN_US[] = {
   "sat"
 };
 
-// Date format: $1 = day name, $2 = month name, $3 = date number
+// Date format: $1 = day name, $2 = month name, $3 = date number (with suffix)
 const char* const DATE_FORMAT_EN_US = "$1  $2 $3 ";
+
+const char* date_suffix_en_US(int date) { return ""; }

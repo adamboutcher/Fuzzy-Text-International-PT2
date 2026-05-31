@@ -180,22 +180,38 @@ void time_to_words(Language lang, int hours, int minutes, int seconds, char* wor
 
 const char* get_day(Language lang, int index) {
   switch (lang) {
-    default:
-      return DAYS_EN_US[index];
+    case EN_GB: return DAYS_EN_GB[index];
+    default:    return DAYS_EN_US[index];
   }
 }
 
 const char* get_month(Language lang, int index) {
   switch (lang) {
-    default:
-      return MONTHS_EN_US[index];
+    case EN_GB: return MONTHS_EN_GB[index];
+    default:    return MONTHS_EN_US[index];
   }
 }
 
 const char* get_date_format(Language lang) {
   switch (lang) {
-    default:
-      return DATE_FORMAT_EN_US;
+    case EN_GB: return DATE_FORMAT_EN_GB;
+    default:    return DATE_FORMAT_EN_US;
+  }
+}
+
+const char* get_date_suffix(Language lang, int date) {
+  switch (lang) {
+    case CA:    return date_suffix_ca(date);
+    case DE:    return date_suffix_de(date);
+    case EN_GB: return date_suffix_en_GB(date);
+    case EN_US: return date_suffix_en_US(date);
+    case ES:    return date_suffix_es(date);
+    case FR:    return date_suffix_fr(date);
+    case NL:    return date_suffix_nl(date);
+    case NO:    return date_suffix_no(date);
+    case PT:    return date_suffix_pt(date);
+    case SV:    return date_suffix_sv(date);
+    default:    return "";
   }
 }
 
@@ -230,6 +246,7 @@ static void format_date_string(char* buffer, size_t length,
 void date_to_words(Language lang, int day, int date, int month, char* words, size_t buffer_size) {
   char date_str[6];
   itoa10(date, date_str);
+  strncat(date_str, get_date_suffix(lang, date), sizeof(date_str) - strlen(date_str) - 1);
 
   format_date_string(words, buffer_size,
                      get_date_format(lang),

@@ -24,3 +24,5 @@ const char* const RELS_NL[] = {
   "tien voor *$2",
   "vijf voor *$2"
 };
+
+const char* date_suffix_nl(int date) { return ""; }

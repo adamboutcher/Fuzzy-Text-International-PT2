@@ -52,3 +52,25 @@ const char* const RELS_EN_GB[] = {
   "five to *$2"
 };
 
+const char* const MONTHS_EN_GB[] = {
+  "jan", "feb", "mar", "apr", "may", "jun",
+  "jul", "aug", "sep", "oct", "nov", "dec"
+};
+
+const char* const DAYS_EN_GB[] = {
+  "sun", "mon", "tue", "wed", "thu", "fri", "sat"
+};
+
+// Date format: $1 = day name, $3 = date number (with suffix), $2 = month name
+const char* const DATE_FORMAT_EN_GB = "$1  $3 $2 ";
+
+const char* date_suffix_en_GB(int date) {
+  int last_two = date % 100;
+  if (last_two >= 11 && last_two <= 13) return "th";
+  switch (date % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}

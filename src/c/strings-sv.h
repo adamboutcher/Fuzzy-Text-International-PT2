@@ -1,4 +1,6 @@
 #pragma once
 
-const char* const HOURS_SV[24];
-const char* const RELS_SV[12];
+extern const char* const HOURS_SV[24];
+extern const char* const RELS_SV[12];
+
+const char* date_suffix_sv(int date);

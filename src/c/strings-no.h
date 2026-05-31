@@ -1,5 +1,6 @@
 #pragma once
 
-const char* const HOURS_NO[24];
-const char* const RELS_NO[12];
+extern const char* const HOURS_NO[24];
+extern const char* const RELS_NO[12];
 
+const char* date_suffix_no(int date);

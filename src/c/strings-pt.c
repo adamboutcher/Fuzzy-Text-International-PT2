@@ -26,3 +26,5 @@ const char* const RELS_PT[] = {
   "dez pras *$2",
   "cinco pras *$2"
 };
+
+const char* date_suffix_pt(int date) { return ""; }

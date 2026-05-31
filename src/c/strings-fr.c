@@ -59,3 +59,5 @@ const char* const RELS_FR[] = {
 // versions would not fit on the screen:
 // - "*$2 heures moins vingt-cinq" -> "*$2 moins vingt-cinq"
 // - "*$2 heures moins le quart" -> "*$2 moins le quart"
+
+const char* date_suffix_fr(int date) { return ""; }
