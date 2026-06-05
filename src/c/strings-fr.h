@@ -3,4 +3,4 @@
 extern const char* const HOURS_FR[24];
 extern const char* const RELS_FR[12];
 
-const char* date_suffix_fr(int date);
+const char* date_suffix_FR(int date);

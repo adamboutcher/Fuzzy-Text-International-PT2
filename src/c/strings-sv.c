@@ -52,4 +52,4 @@ const char* const RELS_SV[] = {
   "fem i *$2"
 };
 
-const char* date_suffix_sv(int date) { return ""; }
+const char* date_suffix_SV(int date) { return ""; }

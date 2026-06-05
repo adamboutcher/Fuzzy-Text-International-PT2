@@ -27,4 +27,4 @@ const char* const RELS_PT[] = {
   "cinco pras *$2"
 };
 
-const char* date_suffix_pt(int date) { return ""; }
+const char* date_suffix_PT(int date) { return ""; }

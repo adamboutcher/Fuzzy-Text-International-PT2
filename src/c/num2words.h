@@ -12,20 +12,20 @@
  *   3. Create src/c/strings-id.h and strings-id.c
  *   4. Add the language to pebble-js-app.js and config-html.js
  */
-#define ALL_LANGUAGES     \
-  X(CA,    ca,    0x0)    \
-  X(DE,    de,    0x1)    \
-  X(EN_GB, en_GB, 0x2)    \
-  X(EN_US, en_US, 0x3)    \
-  X(ES,    es,    0x4)    \
-  X(FR,    fr,    0x5)    \
-  X(NO,    no,    0x6)    \
-  X(SV,    sv,    0x7)    \
-  X(NL,    nl,    0x8)    \
-  X(PT,    pt,    0x9)
+#define ALL_LANGUAGES  \
+  X(CA,    0x0)        \
+  X(DE,    0x1)        \
+  X(EN_GB, 0x2)        \
+  X(EN_US, 0x3)        \
+  X(ES,    0x4)        \
+  X(FR,    0x5)        \
+  X(NO,    0x6)        \
+  X(SV,    0x7)        \
+  X(NL,    0x8)        \
+  X(PT,    0x9)
 
 typedef enum {
-  #define X(ENUM, ID, VAL) ENUM = VAL,
+  #define X(ENUM, VAL) ENUM = VAL,
   ALL_LANGUAGES
   #undef X
 } Language;

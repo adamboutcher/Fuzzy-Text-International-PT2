@@ -52,4 +52,4 @@ const char* const RELS_CA[] = {
   "tres quarts i deu de *$2"
 };
 
-const char* date_suffix_ca(int date) { return ""; }
+const char* date_suffix_CA(int date) { return ""; }

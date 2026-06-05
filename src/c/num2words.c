@@ -82,7 +82,7 @@ typedef struct {
 } LangStrings;
 
 static const LangStrings lang_strings[] = {
-  #define X(ENUM, ID, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM },
+  #define X(ENUM, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM },
   ALL_LANGUAGES
   #undef X
 };
@@ -152,7 +152,7 @@ const char* get_date_format(Language lang) {
 
 const char* get_date_suffix(Language lang, int date) {
   switch (lang) {
-    #define X(ENUM, ID, VAL) case ENUM: return date_suffix_##ID(date);
+    #define X(ENUM, VAL) case ENUM: return date_suffix_##ENUM(date);
     ALL_LANGUAGES
     #undef X
     default: return "";

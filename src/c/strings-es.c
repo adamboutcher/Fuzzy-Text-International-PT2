@@ -52,4 +52,4 @@ const char* const RELS_ES[] = {
   "*$2 menos cinco"
 };
 
-const char* date_suffix_es(int date) { return ""; }
+const char* date_suffix_ES(int date) { return ""; }

@@ -52,4 +52,4 @@ const char* const RELS_DE[] = {
   "fünf vor *$2"
 };
 
-const char* date_suffix_de(int date) { return ""; }
+const char* date_suffix_DE(int date) { return ""; }

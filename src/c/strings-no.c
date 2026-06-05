@@ -52,4 +52,4 @@ const char* const RELS_NO[] = {
   "fem på *$2"
 };
 
-const char* date_suffix_no(int date) { return ""; }
+const char* date_suffix_NO(int date) { return ""; }
