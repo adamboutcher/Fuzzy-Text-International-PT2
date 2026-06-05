@@ -2,17 +2,32 @@
 #include "string.h"
 #include <stdbool.h>
 
+/*
+ * To add a new language:
+ *   1. Add a row here: X(ENUM, id, value)
+ *      ENUM  = C enum name / array prefix (e.g. EN_GB)
+ *      id    = lowercase id / function suffix (e.g. en_GB)
+ *      value = integer sent from JS, must match pebble-js-app.js langs map
+ *   2. Add #include "strings-id.h" in num2words.c
+ *   3. Create src/c/strings-id.h and strings-id.c
+ *   4. Add the language to pebble-js-app.js and config-html.js
+ */
+#define ALL_LANGUAGES     \
+  X(CA,    ca,    0x0)    \
+  X(DE,    de,    0x1)    \
+  X(EN_GB, en_GB, 0x2)    \
+  X(EN_US, en_US, 0x3)    \
+  X(ES,    es,    0x4)    \
+  X(FR,    fr,    0x5)    \
+  X(NO,    no,    0x6)    \
+  X(SV,    sv,    0x7)    \
+  X(NL,    nl,    0x8)    \
+  X(PT,    pt,    0x9)
+
 typedef enum {
-  CA    = 0x0,  /* ca    | Català                  */
-  DE    = 0x1,  /* de    | Deutsch                 */
-  EN_GB = 0x2,  /* en_GB | English (Great Britain) */
-  EN_US = 0x3,  /* en_US | English (United States) */
-  ES    = 0x4,  /* es    | Español                 */
-  FR    = 0x5,  /* fr    | Français                */
-  NO    = 0x6,  /* no    | Norsk                   */
-  SV    = 0x7,  /* sv    | Svenska                 */
-  NL    = 0x8,  /* nl    | Nederlands               */
-  PT    = 0x9   /* pt    | Português                */
+  #define X(ENUM, ID, VAL) ENUM = VAL,
+  ALL_LANGUAGES
+  #undef X
 } Language;
 
 void time_to_words(Language lang, int hours, int minutes, int seconds, char* words, size_t length);

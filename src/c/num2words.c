@@ -76,72 +76,23 @@ char * itoa10(int value, char *result)
   return result;
 }
 
+typedef struct {
+  const char* const* hours;
+  const char* const* rels;
+} LangStrings;
+
+static const LangStrings lang_strings[] = {
+  #define X(ENUM, ID, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM },
+  ALL_LANGUAGES
+  #undef X
+};
+
 const char* get_hour(Language lang, int index) {
-  switch (lang) {
-    case CA:
-      return HOURS_CA[index];
-      break;
-    case DE:
-      return HOURS_DE[index];
-      break;
-    case EN_GB:
-      return HOURS_EN_GB[index];
-      break;
-    case ES:
-      return HOURS_ES[index];
-      break;
-    case FR:
-      return HOURS_FR[index];
-      break;
-    case NO:
-      return HOURS_NO[index];
-      break;
-    case SV:
-      return HOURS_SV[index];
-      break;
-    case NL:
-      return HOURS_NL[index];
-      break;
-    case PT:
-      return HOURS_PT[index];
-      break;
-    default:
-      return HOURS_EN_US[index];
-  }
+  return lang_strings[lang].hours[index];
 }
 
 const char* get_rel(Language lang, int index) {
-  switch (lang) {
-    case CA:
-      return RELS_CA[index];
-      break;
-    case DE:
-      return RELS_DE[index];
-      break;
-    case EN_GB:
-      return RELS_EN_GB[index];
-      break;
-    case ES:
-      return RELS_ES[index];
-      break;
-    case FR:
-      return RELS_FR[index];
-      break;
-    case NO:
-      return RELS_NO[index];
-      break;
-    case SV:
-      return RELS_SV[index];
-      break;
-    case NL:
-      return RELS_NL[index];
-      break;
-    case PT:
-      return RELS_PT[index];
-      break;
-    default:
-      return RELS_EN_US[index];
-  }
+  return lang_strings[lang].rels[index];
 }
 
 void time_to_words(Language lang, int hours, int minutes, int seconds, char* words, size_t buffer_size) {
@@ -201,17 +152,10 @@ const char* get_date_format(Language lang) {
 
 const char* get_date_suffix(Language lang, int date) {
   switch (lang) {
-    case CA:    return date_suffix_ca(date);
-    case DE:    return date_suffix_de(date);
-    case EN_GB: return date_suffix_en_GB(date);
-    case EN_US: return date_suffix_en_US(date);
-    case ES:    return date_suffix_es(date);
-    case FR:    return date_suffix_fr(date);
-    case NL:    return date_suffix_nl(date);
-    case NO:    return date_suffix_no(date);
-    case PT:    return date_suffix_pt(date);
-    case SV:    return date_suffix_sv(date);
-    default:    return "";
+    #define X(ENUM, ID, VAL) case ENUM: return date_suffix_##ID(date);
+    ALL_LANGUAGES
+    #undef X
+    default: return "";
   }
 }
 
