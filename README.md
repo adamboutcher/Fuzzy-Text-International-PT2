@@ -99,18 +99,22 @@ Pull requests are welcome.
 Authors
 -------
 
-Thanks to everyone who made this watchface possible:
-
 - [Mihai Dumitrache][Mihai] — original open-source Text Watch
 - [Mattias Bäcklund][Mattias] — Swedish fuzzy text watch
 - [Jesse Hallett][Jesse] — configuration options and multi-language support
-- [Filip Horvei][iFlips] — Norwegian translation
-- Tomi De Lucca — iOS bug fix and Spanish translation assistance
-- nighto — Portuguese translation
-- [Adam Boutcher][Adam] — this fork: additional languages, UX improvements, and contributor experience
+- [Adam Boutcher][Adam] — this fork: additional languages, UX improvements, and contributor architecture
 
 [Mihai]: https://github.com/mmdumi
 [Mattias]: https://github.com/Sarastro72
 [Jesse]: https://github.com/hallettj
-[iFlips]: https://github.com/iFlips
 [Adam]: https://github.com/adamboutcher
+
+
+Contributors
+------------
+
+- [Filip Horvei][iFlips] — Norwegian translation
+- Tomi De Lucca — iOS bug fix and Spanish translation assistance
+- nighto — Portuguese translation
+
+[iFlips]: https://github.com/iFlips
