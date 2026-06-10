@@ -5,7 +5,7 @@ A watchface for [Pebble][] that displays the time as natural language - "quarter
 
 Originally based on [PebbleTextWatch][] by Mihai Dumitrache, with fuzzy time and Swedish support added by [Mattias Bäcklund][Mattias], and multi-language configuration by [Jesse Hallett][Jesse]. This fork extends that work with additional languages, user experience improvements, and a cleaner architecture for contributors.
 
-[Pebble]: https://getpebble.com/
+[Pebble]: https://repebble.com/
 [PebbleTextWatch]: https://github.com/wearewip/PebbleTextWatch
 
 
