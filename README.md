@@ -27,7 +27,7 @@ All settings are configurable from the Pebble app on your phone:
 
 | Setting | Options |
 |---|---|
-| Invert colors | On / Off |
+| Invert colors | White-on-black / Black-on-white |
 | Show date on shake | On / Off |
 | Date view timeout | 3s / 5s / 8s / 60s / Never |
 | Text alignment | Center / Left / Right |
@@ -118,4 +118,4 @@ Contributors
 - Tomi De Lucca - iOS bug fix and Spanish translation assistance
 - nighto - Portuguese translation
 
-[iFlips]: https://github.com/iFlips
+[iFlips]: https://github.com/iFlips]
