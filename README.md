@@ -12,7 +12,7 @@ Originally based on [PebbleTextWatch][] by Mihai Dumitrache, with fuzzy time and
 Features
 --------
 
-- Fuzzy time in natural language across ten languages
+- Fuzzy time in natural language across nine languages
 - Large, easy-to-read fonts with smooth staggered animations
 - Supports all Pebble models including higher resolution screens such as the Pebble Time 2
 - Between one and four lines of text, adapting to what fits
@@ -29,7 +29,7 @@ All settings are configurable from the Pebble app on your phone:
 |---|---|
 | Invert colors | On / Off |
 | Show date on shake | On / Off |
-| Date view timeout | 3s / 5s / 8s / 1 minute / Never |
+| Date view timeout | 3s / 5s / 8s / 60s / Never |
 | Text alignment | Center / Left / Right |
 | Font size | Small / Medium / Large |
 | Language | See below |
