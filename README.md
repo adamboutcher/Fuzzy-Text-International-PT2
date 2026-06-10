@@ -91,7 +91,7 @@ To add a new language:
    ```
    And add an `<option>` to the select in `src/pkjs/config-html.js`.
 
-Please [open an issue][issue] to request a translation, report an error, or discuss anything else.
+Please [open an issue][issue] to report an error or discuss anything else.
 Pull requests are welcome.
 
 [issue]: https://github.com/adamboutcher/Pebble-Fuzzy-Text-International-PT2/issues/new
@@ -118,4 +118,4 @@ Contributors
 - Tomi De Lucca - iOS bug fix and Spanish translation assistance
 - nighto - Portuguese translation
 
-[iFlips]: https://github.com/iFlips]
+[iFlips]: https://github.com/iFlips
