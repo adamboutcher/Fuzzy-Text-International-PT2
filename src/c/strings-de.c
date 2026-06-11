@@ -1,4 +1,9 @@
 #include "strings-de.h"
+#include "strings-en_US.h"
+
+const char* const* DAYS_DE = DAYS_EN_US;
+const char* const* MONTHS_DE = MONTHS_EN_US;
+const char* DATE_FORMAT_DE = DATE_FORMAT_EN_US;
 
 const char* const HOURS_DE[] = {
   // AM hours

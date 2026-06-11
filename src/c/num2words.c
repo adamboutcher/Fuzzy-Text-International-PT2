@@ -79,10 +79,13 @@ char * itoa10(int value, char *result)
 typedef struct {
   const char* const* hours;
   const char* const* rels;
+  const char* const* days;
+  const char* const* months;
+  const char* date_format;
 } LangStrings;
 
 static const LangStrings lang_strings[] = {
-  #define X(ENUM, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM },
+  #define X(ENUM, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM, DAYS_##ENUM, MONTHS_##ENUM, DATE_FORMAT_##ENUM },
   ALL_LANGUAGES
   #undef X
 };
@@ -130,24 +133,15 @@ void time_to_words(Language lang, int hours, int minutes, int seconds, char* wor
 }
 
 const char* get_day(Language lang, int index) {
-  switch (lang) {
-    case EN_GB: return DAYS_EN_GB[index];
-    default:    return DAYS_EN_US[index];
-  }
+  return lang_strings[lang].days[index];
 }
 
 const char* get_month(Language lang, int index) {
-  switch (lang) {
-    case EN_GB: return MONTHS_EN_GB[index];
-    default:    return MONTHS_EN_US[index];
-  }
+  return lang_strings[lang].months[index];
 }
 
 const char* get_date_format(Language lang) {
-  switch (lang) {
-    case EN_GB: return DATE_FORMAT_EN_GB;
-    default:    return DATE_FORMAT_EN_US;
-  }
+  return lang_strings[lang].date_format;
 }
 
 const char* get_date_suffix(Language lang, int date) {
