@@ -62,7 +62,7 @@ const char* const DAYS_EN_GB[] = {
 };
 
 // Date format: $1 = day name, $3 = date number (with suffix), $2 = month name
-const char* const DATE_FORMAT_EN_GB = "$1  $3 $2 ";
+const char DATE_FORMAT_EN_GB[] = "$1  $3 $2 ";
 
 const char* date_suffix_EN_GB(int date) {
   int last_two = date % 100;

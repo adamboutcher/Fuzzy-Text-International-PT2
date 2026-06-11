@@ -55,13 +55,21 @@ Contributing a Translation
 
 To add a new language:
 
-1. **Create `src/c/strings-XX.h`** - declare the arrays and suffix function:
+1. **Create `src/c/strings-XX.h`** - declare the arrays, date macros, and suffix function:
    ```c
    #pragma once
+   #include "strings-en_US.h"
+
    extern const char* const HOURS_XX[24];
    extern const char* const RELS_XX[12];
+
+   #define DAYS_XX        DAYS_EN_US
+   #define MONTHS_XX      MONTHS_EN_US
+   #define DATE_FORMAT_XX "$1  $2 $3 "
+
    const char* date_suffix_XX(int date);
    ```
+   If your language uses its own day/month names or date order, define `DAYS_XX[7]`, `MONTHS_XX[12]`, and `DATE_FORMAT_XX[]` as real arrays instead (see `strings-de.h` as an example).
 
 2. **Create `src/c/strings-XX.c`** - define 24 hour names, 12 relative-time phrases, and a suffix function (return `""` if your language doesn't use ordinal suffixes):
    ```c

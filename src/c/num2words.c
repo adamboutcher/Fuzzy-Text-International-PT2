@@ -79,10 +79,13 @@ char * itoa10(int value, char *result)
 typedef struct {
   const char* const* hours;
   const char* const* rels;
+  const char* const* days;
+  const char* const* months;
+  const char* date_format;
 } LangStrings;
 
 static const LangStrings lang_strings[] = {
-  #define X(ENUM, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM },
+  #define X(ENUM, VAL) [ENUM] = { HOURS_##ENUM, RELS_##ENUM, DAYS_##ENUM, MONTHS_##ENUM, DATE_FORMAT_##ENUM },
   ALL_LANGUAGES
   #undef X
 };
