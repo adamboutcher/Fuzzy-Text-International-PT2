@@ -1,81 +1,121 @@
-Fuzzy Text International
-========================
+Fuzzy Text International 2
+==========================
 
-This is a watchface for the [Pebble][].  It is originally based on the
-[PebbleTextWatch][] by Mihai Dumitrache, which reproduced the look of
-the Text Watch that comes standard with the Pebble.
+A watchface for [Pebble][] that displays the time as natural language - "quarter past three", "half past ten" - in your choice of language and visual style.
 
-[Pebble]: https://getpebble.com/
+Originally based on [PebbleTextWatch][] by Mihai Dumitrache, with fuzzy time and Swedish support added by [Mattias Bäcklund][Mattias], and multi-language configuration by [Jesse Hallett][Jesse]. This fork extends that work with additional languages, user experience improvements, and a cleaner architecture for contributors.
+
+[Pebble]: https://repebble.com/
 [PebbleTextWatch]: https://github.com/wearewip/PebbleTextWatch
 
-Mattias Bäcklund created a modified version, [Swedish fuzzy text
-watch][], that displays fuzzy time.  Mattias wanted to combine the
-elegant layout and animations of the Text Watch with the natural
-language of the Fuzzy Time watchface, and wanted it in his native
-language, Swedish.
 
-[Swedish fuzzy text watch]: https://github.com/Sarastro72/Swedish-Fuzzy-Text-watch
+Features
+--------
 
-This version builds upon the work by Mihai and Mattias: it supports
-multiple languages, and provides options to change the visual style.
+- Fuzzy time in natural language across nine languages
+- Large, easy-to-read fonts with smooth staggered animations
+- Supports all Pebble models including higher resolution screens such as the Pebble Time 2
+- Between one and four lines of text, adapting to what fits
+- Shake to show the date, with a configurable auto-revert timeout
+- Ordinal date suffixes for English (GB): 1st, 2nd, 3rd…
 
-Features:
 
- - Fuzzy time in natural language
- - The large and easy to read fonts of the original Text Watch
- - Nice staggered animation
- - Between one and four lines of text, depending on need
- - Smaller words may share a single line (such as "fem i")
+Settings
+--------
 
-The following options can be configured, using the Pebble app on your
-phone:
+All settings are configurable from the Pebble app on your phone:
 
-- Invert colors (white-on-black or black-on-white)
-- Text alignment (centered, left, or right)
-- Language
+| Setting | Options |
+|---|---|
+| Invert colors | White-on-black / Black-on-white |
+| Show date on shake | On / Off |
+| Date view timeout | 3s / 5s / 8s / 60s / Never |
+| Text alignment | Center / Left / Right |
+| Font size | Small / Medium / Large |
+| Language | See below |
 
-At this time the included languages are:
 
-- English
-- French
-- German
-- Norwegian
-- Spanish
-- Swedish
+Languages
+---------
+
+- Català
+- Deutsch
+- English (Great Britain)
+- English (United States)
+- Español
+- Français
+- Nederlands
+- Norsk
+- Português
+- Svenska
+
+
+Contributing a Translation
+--------------------------
+
+To add a new language:
+
+1. **Create `src/c/strings-XX.h`** - declare the arrays and suffix function:
+   ```c
+   #pragma once
+   extern const char* const HOURS_XX[24];
+   extern const char* const RELS_XX[12];
+   const char* date_suffix_XX(int date);
+   ```
+
+2. **Create `src/c/strings-XX.c`** - define 24 hour names, 12 relative-time phrases, and a suffix function (return `""` if your language doesn't use ordinal suffixes):
+   ```c
+   #include "strings-XX.h"
+   const char* const HOURS_XX[] = { /* 12 AM + 12 PM hour names */ };
+   const char* const RELS_XX[] = {
+     "*$1 ...",   /* on the hour   */
+     /* 11 more five-minute intervals */
+   };
+   const char* date_suffix_XX(int date) { return ""; }
+   ```
+   In the `RELS_XX` phrases, `$1` is replaced with the current hour and `$2` with the next. A `*` prefix makes that word bold.
+
+3. **Register the language in `src/c/num2words.h`** - add one row to `ALL_LANGUAGES` with a unique integer value:
+   ```c
+   X(XX, 0xN)
+   ```
+
+4. **Add the include in `src/c/num2words.c`**:
+   ```c
+   #include "strings-XX.h"
+   ```
+
+5. **Wire up the JS side** - add the language to `src/pkjs/pebble-js-app.js`:
+   ```javascript
+   xx: N
+   ```
+   And add an `<option>` to the select in `src/pkjs/config-html.js`.
+
+Please [open an issue][issue] to report an error or discuss anything else.
+Pull requests are welcome.
+
+[issue]: https://github.com/adamboutcher/Pebble-Fuzzy-Text-International-PT2/issues/new
 
 
 Authors
 -------
 
-Thanks to all of the people who made this watchface possible:
-
-- [Mihai Dumitrache][Mihai], implemented an open source version of Text Watch
-- [Mattias Bäcklund][Mattias], created Swedish fuzzy text watch
-- [Jesse Hallett][Jesse], added configuration options and multiple language support
-- [Filip Horvei][iFlips], provided Norwegian translation
-- Tomi De Lucca, discovered fix for a severe iOS bug & assisted with Spanish translation
+- [Mihai Dumitrache][Mihai] - original open-source Text Watch
+- [Mattias Bäcklund][Mattias] - Swedish fuzzy text watch
+- [Jesse Hallett][Jesse] - configuration options and multi-language support
+- [Adam Boutcher][Adam] - this fork: additional languages, UX improvements, and contributor architecture
 
 [Mihai]: https://github.com/mmdumi
 [Mattias]: https://github.com/Sarastro72
 [Jesse]: https://github.com/hallettj
-[iFlips]: https://github.com/iFlips
+[Adam]: https://github.com/adamboutcher
 
 
-Contributing
+Contributors
 ------------
 
-If you would like to request a translation, provide a translation, or
-point out errors in a translation, please [open an issue][issue].
+- [Filip Horvei][iFlips] - Norwegian translation
+- Tomi De Lucca - iOS bug fix and Spanish translation assistance
+- nighto - Portuguese translation
 
-[issue]: https://github.com/hallettj/Fuzzy-Text-International/issues/new
-
-For an example of what is needed for translations, take a look at
-[`strings-en.c`][en].  In case you want to implement a translation
-yourself, look at [818e076][es] to see all of the code changes that are
-necessary to do so.
-
-[en]: https://github.com/hallettj/Fuzzy-Text-International/blob/master/src/strings-en.c
-[es]: https://github.com/hallettj/Fuzzy-Text-International/commit/818e07686761adc00245986f6d389076534a5c1a
-
-Please feel free to open issues for matters other than translations!
-Pull requests are welcome as well.
+[iFlips]: https://github.com/iFlips
