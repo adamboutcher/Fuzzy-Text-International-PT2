@@ -78,6 +78,6 @@ const char* const DAYS_DE[] = {
 };
 
 // Date format: $1 = day name, $2 = month name, $3 = date number (with suffix)
-const char* const DATE_FORMAT_DE = "$1  $3 $2 ";
+const char DATE_FORMAT_DE[] = "$1  $3 $2 ";
 
 const char* date_suffix_DE(int date) { return ""; }
