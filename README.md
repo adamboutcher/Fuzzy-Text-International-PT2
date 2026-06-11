@@ -123,7 +123,9 @@ Contributors
 ------------
 
 - [Filip Horvei][iFlips] - Norwegian translation
-- Tomi De Lucca - iOS bug fix and Spanish translation assistance
-- nighto - Portuguese translation
+- Tomi De Lucca - iOS bug fix and Spanish translation assistance.
+- nighto - Portuguese translation.
+- [Reiner Herrmann][reinerh] - Updates to include dates in the German Translation.
 
 [iFlips]: https://github.com/iFlips
+[reinerh]: https://github.com/reinerh
