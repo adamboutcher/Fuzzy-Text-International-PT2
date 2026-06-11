@@ -48,6 +48,7 @@ var configHTML = [
   '      <select name="lang" class="form-control input-lg">',
   '        <option value="ca">Catal&#224;</option>',
   '        <option value="de">Deutsch</option>',
+  '        <option value="de2">Deutsch (Alternative)</option>',
   '        <option value="en_GB">English (Great Britain)</option>',
   '        <option value="en_US">English (United States)</option>',
   '        <option value="es">Espa&#241;ol</option>',
